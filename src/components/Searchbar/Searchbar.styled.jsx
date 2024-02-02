@@ -11,7 +11,7 @@ export const SearchForm = styled.form`
   overflow: hidden;
 `;
 
-export const SearchBar = styled.div`
+export const Searchbar = styled.div`
   top: 0;
   left: 0;
   position: sticky;
