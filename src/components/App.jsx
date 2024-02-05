@@ -1,47 +1,96 @@
 import React, { Component } from 'react';
+
 import SearchBar from './Searchbar/Searchbar';
+import Loader from '../components/Loader/Loader';
+import { Button } from './Button/Button';
+import Modal from './Modal/Modal';
+import ImageGallery from '../components/ImageGallery/ImageGallery';
+
 import { getAllPosts } from '../Fetch';
 
 class App extends Component {
   state = {
     images: [],
-    searchName: '',
+    status: 'idle',
+    query: '',
+    page: 1,
+    largeImg: '',
   };
 
-  componentDidMount() {
-    getAllPosts().then(({ data }) => {
-      if (data?.hits && data.hits.length) {
-        this.setState({ images: data.hits });
-      }
-    });
+  componentDidUpdate(_, prevState) {
+    if (
+      prevState.query !== this.state.query ||
+      prevState.page !== this.state.page
+    ) {
+      this.setState({ status: 'pending' });
+      this.fetchImg(this.state.query, this.state.page);
+    }
+    if (prevState.query !== this.state.query) {
+      this.setState({ images: [] });
+    }
   }
 
-  onSubmit = searchName => {
-    this.setState({ searchName });
+  fetchImg = async (query, page) => {
+    try {
+      const hits = await getAllPosts(query, page);
+      hits.length === 0
+        ? this.setState({ status: 'rejected' })
+        : this.setState(prevState => ({
+            images: [...prevState.images, ...hits],
+            status: 'resolved',
+          }));
+    } catch (error) {
+      console.log(error);
+      this.setState({ status: 'rejected' });
+    }
+    console.log(this.state);
+  };
+
+  onSubmit = query => {
+    this.setState({ query });
+    console.log(this.state);
+  };
+
+  onClick = e => {
+    e.preventDefault();
+    this.setState(prevState => ({ page: prevState.page + 1 }));
+  };
+
+  openModal = img => {
+    this.setState({ largeImg: img });
+  };
+  toggleModal = () => {
+    this.setState({ largeImg: '' });
   };
 
   render() {
+    const { status, images } = this.state;
     return (
       <div>
         <SearchBar onSubmit={this.onSubmit} />
-        <ul
-          style={{
-            listStyle: 'none',
-            padding: 0,
-            display: 'flex',
-            flexWrap: 'wrap',
-          }}
-        >
-          {this.state.images.map(image => (
-            <li key={image.id} style={{ margin: '8px', maxWidth: '300px' }}>
-              <img
-                src={image.webformatURL}
-                alt={image.tags}
-                style={{ width: '100%', height: 'auto' }}
-              />
-            </li>
-          ))}
-        </ul>
+        {images.length > 0 ? (
+          <ImageGallery images={images} />
+        ) : (
+          <p
+            style={{
+              padding: 100,
+              textAlign: 'center',
+              fontSize: 30,
+            }}
+          >
+            Gallery is empty
+          </p>
+        )}
+        {status === 'pending' && <Loader />}
+        {status === 'resolved' && this.state.images.length > 0 && (
+          <Button onClick={this.onClick} />
+        )}
+        {this.state.largeImg && (
+          <Modal
+            toggleModal={this.toggleModal}
+            largeImg={this.state.largeImg}
+          />
+        )}
       </div>
     );
   }
