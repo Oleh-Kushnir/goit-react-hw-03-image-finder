@@ -15,6 +15,7 @@ class App extends Component {
     query: '',
     page: 1,
     largeImg: '',
+    totalPages: 0,
   };
 
   componentDidUpdate(_, prevState) {
@@ -43,16 +44,16 @@ class App extends Component {
       console.log(error);
       this.setState({ status: 'rejected' });
     }
-    console.log(this.state);
   };
 
   onSubmit = query => {
-    this.setState({ query });
+    this.setState({ query, page: 1, images: [] });
     console.log(this.state);
   };
 
   onClick = e => {
     e.preventDefault();
+
     this.setState(prevState => ({ page: prevState.page + 1 }));
   };
 
@@ -64,7 +65,7 @@ class App extends Component {
   };
 
   render() {
-    const { status, images } = this.state;
+    const { status, images, totalPages, page } = this.state;
     return (
       <div>
         <SearchBar onSubmit={this.onSubmit} />
@@ -82,9 +83,9 @@ class App extends Component {
           </p>
         )}
         {status === 'pending' && <Loader />}
-        {status === 'resolved' && this.state.images.length > 0 && (
-          <Button onClick={this.onClick} />
-        )}
+        {status === 'resolved' &&
+          this.state.images.length > 0 &&
+          totalPages !== page && <Button onClick={this.onClick} />}
         {this.state.largeImg && (
           <Modal
             toggleModal={this.toggleModal}
