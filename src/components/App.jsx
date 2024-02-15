@@ -15,7 +15,7 @@ class App extends Component {
     query: '',
     page: 1,
     largeImg: '',
-    totalPages: 0,
+    totalHits: 0,
   };
 
   componentDidUpdate(_, prevState) {
@@ -65,7 +65,7 @@ class App extends Component {
   };
 
   render() {
-    const { status, images, totalPages, page } = this.state;
+    const { status, images, totalHits } = this.state;
     return (
       <div>
         <SearchBar onSubmit={this.onSubmit} />
@@ -83,9 +83,7 @@ class App extends Component {
           </p>
         )}
         {status === 'pending' && <Loader />}
-        {status === 'resolved' &&
-          this.state.images.length > 0 &&
-          totalPages !== page && <Button onClick={this.onClick} />}
+        {totalHits > images.length && <Button onClick={this.onClick} />}
         {this.state.largeImg && (
           <Modal
             toggleModal={this.toggleModal}
