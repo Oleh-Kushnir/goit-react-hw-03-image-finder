@@ -33,11 +33,12 @@ class App extends Component {
 
   fetchImg = async (query, page) => {
     try {
-      const hits = await getAllPosts(query, page);
+      const { hits, totalHits } = await getAllPosts(query, page);
       hits.length === 0
         ? this.setState({ status: 'rejected' })
         : this.setState(prevState => ({
             images: [...prevState.images, ...hits],
+            totalHits,
             status: 'resolved',
           }));
     } catch (error) {

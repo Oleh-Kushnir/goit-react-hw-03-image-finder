@@ -10,8 +10,9 @@ export const getAllPosts = async (query, page) => {
   const response = await axios.get(
     `https://pixabay.com/api/?q=${query}&page=${page}&key=${API_KEY}&image_type=photo&orientation=horizontal&per_page=${perPage}`
   );
-  const { hits } = response.data;
-  return hits;
+  const { hits, totalHits } = response.data;
+
+  return { hits, totalHits };
 };
 
 export const normalizedImages = imagesArray =>
